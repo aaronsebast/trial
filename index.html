@@ -11,30 +11,33 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
 
   <style>
-    /* Reset and base styling */
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Open Sans', sans-serif; background: #111; color: #EEE; }
 
-    /* Header styles */
-    header {
+    /* Banner/header with full‑width image */
+    .banner {
       width: 100%;
       overflow: hidden;
-      text-align: center;
+      position: relative;
     }
-    header img.logo-full {
+    .banner img {
       width: 100%;
       height: auto;
       display: block;
-      object-fit: cover;
+      object-fit: cover; /* ensures it fills width nicely and keeps aspect ratio */ 
     }
-    header h1 {
+
+    /* Title area under banner */
+    .site-title {
+      text-align: center;
+      background: #0d0d0d;
+      padding: 1.5rem 1rem;
+    }
+    .site-title h1 {
       font-family: 'Playfair Display', serif;
-      font-size: 2.8rem;
+      font-size: 3rem;
       letter-spacing: 1px;
       color: #f5f5f5;
-      background: #0d0d0d; /* optional, for contrast under the logo */
-      padding: 1rem 0;
-      margin: 0;
     }
 
     main {
@@ -43,6 +46,7 @@
       margin: 0 auto;
     }
 
+    /* Announcement cards CSS (same as before, or adjust as you like) */
     .announcement {
       background: #1a1a1a;
       border: 1px solid #333;
@@ -106,58 +110,61 @@
 </head>
 <body>
 
-<header>
-  <!-- Full-width logo -->  
-  <img class="logo-full" src="riga-nordic-university-latvia.png" alt="University Logo">
-  <!-- Title below the logo -->
-  <h1>EduNotify</h1>
-</header>
+  <!-- Full‑width banner with university image -->
+  <div class="banner">
+    <img src="riga_nordic_university_rnu_cover.jpg" alt="Riga Nordic University">
+  </div>
 
-<main>
-  <h2 style="margin-bottom: 1.5rem; color: #f5f5f5; font-family: 'Playfair Display', serif;">Announcements</h2>
-  <div id="announcements"></div>
-</main>
+  <!-- Site title below banner -->
+  <div class="site-title">
+    <h1>EduNotify</h1>
+  </div>
 
-<script>
-  const announcements = [
-    { id: 1, title: "Welcome Week – Orientation", content: "Welcome all new students! Orientation starts on 15 Sept.", category: "Event", read: false },
-    { id: 2, title: "Maintenance Notice", content: "Server maintenance: 3 Oct, 02:00–05:00 UTC — site will be offline.", category: "Alert", read: false },
-    { id: 3, title: "New Library Hours", content: "Library now open until 22:00 on weekdays.", category: "General", read: false }
-  ];
+  <main>
+    <h2 style="margin-bottom: 1.5rem; color: #f5f5f5; font-family: 'Playfair Display', serif;">Announcements</h2>
+    <div id="announcements"></div>
+  </main>
 
-  function renderAnnouncements() {
-    const container = document.getElementById('announcements');
-    container.innerHTML = '';
-    announcements.forEach(a => {
-      const div = document.createElement('div');
-      div.className = 'announcement' + (a.read ? '' : ' unread');
-      const title = document.createElement('h3');
-      title.textContent = a.title;
-      const cat = document.createElement('div');
-      cat.className = 'category';
-      cat.textContent = a.category;
-      const content = document.createElement('div');
-      content.className = 'content';
-      content.textContent = a.content;
-      const btn = document.createElement('button');
-      btn.className = 'btn';
-      btn.textContent = a.read ? 'Mark as unread' : 'Mark as read';
-      btn.onclick = () => {
-        a.read = !a.read;
-        renderAnnouncements();
-      };
+  <script>
+    const announcements = [
+      { id: 1, title: "Welcome Week – Orientation", content: "Welcome all new students! Orientation starts on 15 Sept.", category: "Event", read: false },
+      { id: 2, title: "Maintenance Notice", content: "Server maintenance: 3 Oct, 02:00–05:00 UTC — site will be offline.", category: "Alert", read: false },
+      { id: 3, title: "New Library Hours", content: "Library now open until 22:00 on weekdays.", category: "General", read: false }
+    ];
 
-      div.appendChild(title);
-      div.appendChild(cat);
-      div.appendChild(content);
-      div.appendChild(btn);
+    function renderAnnouncements() {
+      const container = document.getElementById('announcements');
+      container.innerHTML = '';
+      announcements.forEach(a => {
+        const div = document.createElement('div');
+        div.className = 'announcement' + (a.read ? '' : ' unread');
+        const title = document.createElement('h3');
+        title.textContent = a.title;
+        const cat = document.createElement('div');
+        cat.className = 'category';
+        cat.textContent = a.category;
+        const content = document.createElement('div');
+        content.className = 'content';
+        content.textContent = a.content;
+        const btn = document.createElement('button');
+        btn.className = 'btn';
+        btn.textContent = a.read ? 'Mark as unread' : 'Mark as read';
+        btn.onclick = () => {
+          a.read = !a.read;
+          renderAnnouncements();
+        };
 
-      container.appendChild(div);
-    });
-  }
+        div.appendChild(title);
+        div.appendChild(cat);
+        div.appendChild(content);
+        div.appendChild(btn);
 
-  renderAnnouncements();
-</script>
+        container.appendChild(div);
+      });
+    }
+
+    renderAnnouncements();
+  </script>
 
 </body>
 </html>
