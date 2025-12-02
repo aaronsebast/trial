@@ -1,352 +1,163 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Auce, Latvia</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Georgia', serif;
-            color: #2c3e50;
-            background: linear-gradient(120deg, #f7f1e3, #dcdde1);
-            overflow-x: hidden;
-        }
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EduNotify — Announcements</title>
 
-        header {
-            background: radial-gradient(circle at center, #900C3F, #641220);
-            color: white;
-            text-align: center;
-            padding: 60px 20px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-        }
-        header h1 {
-            font-size: 3em;
-            letter-spacing: 2px;
-            margin: 0;
-            animation: popIn 1s ease-out;
-        }
-        header p {
-            font-size: 1.4em;
-            margin: 10px 0 0;
-            animation: fadeIn 1.5s ease-out;
-        }
+  <!-- Elegant fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
 
-        section {
-            max-width: 1100px;
-            margin: 30px auto;
-            padding: 30px;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
-            transform: perspective(1000px) translateY(0) rotateX(0);
-            opacity: 1;
-            transition: transform 0.5s, opacity 0.5s;
-        }
-        section h2 {
-            color: #641220;
-            margin-bottom: 15px;
-            font-size: 2em;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
-        }
-        section p, section ul {
-            font-size: 1.2em;
-            line-height: 1.8;
-            margin-bottom: 15px;
-        }
-        section ul {
-            list-style: square;
-            padding-left: 20px;
-        }
-        section ul li {
-            margin-bottom: 10px;
-        }
+  <style>
+    /* Reset and base styling */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Open Sans', sans-serif; background: #111; color: #EEE; }
 
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px) rotateX(-3deg);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) rotateX(0);
-            }
-        }
+    /* Header styles */
+    header {
+      width: 100%;
+      overflow: hidden;
+      text-align: center;
+    }
+    header img.logo-full {
+      width: 100%;
+      height: auto;
+      display: block;
+      object-fit: cover;
+    }
+    header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.8rem;
+      letter-spacing: 1px;
+      color: #f5f5f5;
+      background: #0d0d0d; /* optional, for contrast under the logo */
+      padding: 1rem 0;
+      margin: 0;
+    }
 
-        @keyframes popIn {
-            0% {
-                opacity: 0;
-                transform: scale(0.8);
-            }
-            100% {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
+    main {
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
 
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
-        }
+    .announcement {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      padding: 1.8rem 2rem;
+      margin-bottom: 2rem;
+      border-radius: 8px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+    }
+    .announcement.unread {
+      border-color: #bfa054;
+    }
+    .announcement:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+      background: #222;
+    }
 
-        section:nth-child(even) {
-            background: linear-gradient(to right, #f7f7f7, #fff);
-        }
+    .announcement h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem;
+      margin-bottom: 0.5rem;
+      color: #f9f9f9;
+      transition: color 0.3s ease;
+    }
+    .announcement:hover h3 {
+      color: #bfa054;
+    }
 
-        nav a:hover {
-            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
-        }
+    .category {
+      font-size: 0.9rem;
+      color: #999;
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: color 0.3s ease;
+    }
+    .announcement:hover .category {
+      color: #ccc;
+    }
 
-        section:hover {
-            transform: perspective(1000px) rotateY(1deg) scale(1.02);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-        }
-
-        header::after {
-            content: "";
-            display: block;
-            width: 150px;
-            height: 4px;
-            background: #DAA520;
-            margin: 20px auto 0;
-        }
-     nav {
-    background: #900C3F;
-    display: flex;
-    overflow-x: auto; 
-    white-space: nowrap; 
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    scrollbar-width: thin; 
-}
-
-nav a {
-    color: white;
-    text-decoration: none;
-    padding: 15px 20px;
-    font-weight: bold;
-    font-size: 1.2em;
-    text-transform: uppercase;
-    transition: color 0.3s, transform 0.3s;
-    display: inline-block;
-
-nav a:hover {
-    color: #DAA520;
-    transform: scale(1.1);
-    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
-}
-
-nav::-webkit-scrollbar {
-    height: 6px;
-}
-nav::-webkit-scrollbar-thumb {
-    background: #DAA520;
-    border-radius: 10px;
-}
-nav::-webkit-scrollbar-track {
-    background: #641220;
-}
-
-
-    </style>
+    .content {
+      font-size: 1rem;
+      line-height: 1.6;
+      margin-bottom: 1.2rem;
+      color: #ddd;
+    }
+    .btn {
+      padding: 0.6rem 1.3rem;
+      background: #bfa054;
+      color: #111;
+      border: none;
+      font-weight: 600;
+      border-radius: 4px;
+      transition: background 0.3s ease, transform 0.2s ease;
+    }
+    .btn:hover {
+      background: #d4b579;
+      transform: translateY(-2px);
+    }
+  </style>
 </head>
 <body>
 
-    <header>
-        <h1>Welcome to Auce, Latvia</h1>
-        <p>Your journey to history, culture, and beauty begins here.</p>
-    </header>
+<header>
+  <!-- Full-width logo -->  
+  <img class="logo-full" src="riga-nordic-university-latvia.png" alt="University Logo">
+  <!-- Title below the logo -->
+  <h1>EduNotify</h1>
+</header>
 
-   <nav>
-    <a href="#tourist-attractions">Tourist Attractions</a>
-    <a href="#getting-there">How to Reach</a>
-    <a href="#travel-time">Travel Time</a>
-    <a href="#weather">Weather</a>
-    <a href="#culture">Culture</a>
-    <a href="#history">History of Auce</a>
-    <a href="#food-music">Food & Music</a>
-    <a href="#geography">Geography</a>
-    <a href="#accommodations">Accommodations</a>
-    <a href="#events-calendar">Events Calendar</a>
-    <a href="#local-businesses">Local Businesses</a>
-    <a href="#gallery">Gallery</a>
-    <a href="#visitor-information">Visitor Information</a>
-    <a href="#contact-us">Contact Us</a>
-</nav>
-    
-   <section id="tourist-attractions">
-    <h2>Tourist Attractions</h2>
-    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
-        <div style="display: flex; flex-direction: column; align-items: center; text-align: center;">
-            <img src="auceoldtown.png" alt="Auce Old Town" style="width: 100%; height: auto; border-radius: 10px; box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);">
-            <p><b>Auce Old Town:</b> Discover the charm of cobblestone streets, traditional Latvian wooden houses, historic buildings, and quaint cafés offering local pastries and coffee. Guided walking tours are available to delve into the town's history.</p>
-        </div>
+<main>
+  <h2 style="margin-bottom: 1.5rem; color: #f5f5f5; font-family: 'Playfair Display', serif;">Announcements</h2>
+  <div id="announcements"></div>
+</main>
 
-        <div style="display: flex; flex-direction: column; align-items: center; text-align: center;">
-            <img src="aucemanor.jpg" alt="Auce Manor" style="width: 100%; height: auto; border-radius: 10px; box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);">
-            <p><b>Auce Manor:</b> A 19th-century manor featuring beautifully landscaped gardens, historical exhibits, and occasional cultural events. The manor's interiors showcase period furnishings and art collections.</p>
-        </div>
+<script>
+  const announcements = [
+    { id: 1, title: "Welcome Week – Orientation", content: "Welcome all new students! Orientation starts on 15 Sept.", category: "Event", read: false },
+    { id: 2, title: "Maintenance Notice", content: "Server maintenance: 3 Oct, 02:00–05:00 UTC — site will be offline.", category: "Alert", read: false },
+    { id: 3, title: "New Library Hours", content: "Library now open until 22:00 on weekdays.", category: "General", read: false }
+  ];
 
-        <div style="display: flex; flex-direction: column; align-items: center; text-align: center;">
-            <img src="aucepark.jpg" alt="Nature Parks in Auce" style="width: 100%; height: auto; border-radius: 10px; box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);">
-            <p><b>Nature Parks:</b> Enjoy tranquil settings with walking trails, birdwatching, picnic areas, and scenic views. Popular parks include Auce Forest Reserve and Lielupe Riverbank trails.</p>
-        </div>
-    </div>
-</section>
+  function renderAnnouncements() {
+    const container = document.getElementById('announcements');
+    container.innerHTML = '';
+    announcements.forEach(a => {
+      const div = document.createElement('div');
+      div.className = 'announcement' + (a.read ? '' : ' unread');
+      const title = document.createElement('h3');
+      title.textContent = a.title;
+      const cat = document.createElement('div');
+      cat.className = 'category';
+      cat.textContent = a.category;
+      const content = document.createElement('div');
+      content.className = 'content';
+      content.textContent = a.content;
+      const btn = document.createElement('button');
+      btn.className = 'btn';
+      btn.textContent = a.read ? 'Mark as unread' : 'Mark as read';
+      btn.onclick = () => {
+        a.read = !a.read;
+        renderAnnouncements();
+      };
 
-<section id="getting-there">
-    <h2>How to Reach Auce</h2>
-    <p>Auce is conveniently accessible through various modes of transportation, making it easy to explore this charming town from different parts of Latvia:</p>
-    <ul>
-        <li><b>By Car:</b> Enjoy a scenic 1.5-hour drive from Riga via the A9 highway, followed by regional roads. Parking is readily available in town. If you're traveling from Liepāja, the journey takes around 2 hours, while from Ventspils, it’s approximately 2.5 hours. The well-maintained roads make driving an enjoyable experience, with opportunities to admire Latvia’s picturesque countryside along the way.</li>
-        <li><b>By Train:</b> Take a train from Riga to Jelgava, and connect to Auce via a local train or bus. Trains are comfortable, affordable, and an excellent option for travelers looking to avoid driving. From Jelgava, it’s a short 40-minute train or bus ride to Auce. If you’re coming from Daugavpils or other eastern cities, you can connect via Riga or Jelgava for a seamless journey.</li>
-        <li><b>By Bus:</b> Frequent buses operate between Riga and Auce, offering a budget-friendly option for travelers. The trip from Riga takes about 2 hours, and the route provides a chance to enjoy the countryside’s natural beauty. Buses from other cities such as Liepāja, Dobele, and Jelgava are also available, making Auce easily accessible for domestic tourists.</li>
-        <li><b>By Bicycle:</b> For the adventurous traveler, cycling to Auce is a fantastic option, especially during the warmer months. Scenic bike paths from nearby towns like Dobele make the journey a delightful experience for nature lovers and fitness enthusiasts.</li>
-    </ul>
-    <p>Once in Auce, navigating the town is straightforward, with most attractions within walking or cycling distance. For those seeking convenience, local taxi services and rental bikes are also available to help you explore the area effortlessly.</p>
-</section>
+      div.appendChild(title);
+      div.appendChild(cat);
+      div.appendChild(content);
+      div.appendChild(btn);
 
-<section id="travel-time">
-    <h2>Travel Time</h2>
-    <p><b>From Riga:</b> About 1.5 hours by car or approximately 2 hours using train and bus connections.</p>
-    <p><b>From Vilnius:</b> A 3-hour drive makes it an ideal weekend destination for visitors from Lithuania.</p>
-</section>
+      container.appendChild(div);
+    });
+  }
 
-<section id="weather">
-    <h2>Weather</h2>
-    <p>Auce has a temperate climate with four distinct seasons:</p>
-    <ul>
-        <li><b>Summer:</b> Warm and sunny, with temperatures ranging from 15°C to 25°C, ideal for outdoor activities.</li>
-        <li><b>Autumn:</b> Mild and colorful, perfect for hiking and sightseeing.</li>
-        <li><b>Winter:</b> Snowy and serene, with temperatures often dropping below 0°C, creating opportunities for winter sports.</li>
-        <li><b>Spring:</b> Fresh and green, with blooming flowers and mild weather suitable for exploring nature.</li>
-    </ul>
-</section>
-
-<section id="culture">
-    <h2>Culture</h2>
-    <p>Immerse yourself in Auce's rich cultural heritage:</p>
-    <ul>
-        <li>Traditional festivals such as Midsummer's Eve, featuring bonfires, singing, and dancing.</li>
-        <li>Local folk music performances with traditional instruments like the kokle.</li>
-        <li>Artisan markets showcasing handcrafted goods, from textiles to ceramics.</li>
-    </ul>
-</section>
-
-<section id="history">
-    <h2>History of Auce</h2>
-    <p>Auce has a storied past that traces back to the Duchy of Courland and Semigallia:</p>
-    <ul>
-        <li>Medieval origins as a trade and agricultural hub.</li>
-        <li>Rich legacy of cultural exchanges during periods of occupation and independence.</li>
-        <li>Preservation of historical landmarks and archives that tell the tale of its resilient community.</li>
-    </ul>
-</section>
-
-<section id="food-music">
-    <h2>Food & Music</h2>
-    <p>Experience the flavors and sounds of Auce:</p>
-    <ul>
-        <li><b>Food:</b> Indulge in local specialties such as hearty soups, smoked meats, fresh dairy products, and dark rye bread.</li>
-        <li><b>Music:</b> From traditional folk melodies to contemporary performances, music plays a vital role in community events and celebrations.</li>
-    </ul>
-</section>
-
-<section id="geography">
-    <h2>Geography</h2>
-    <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
-        <img src="aucemap.jpg" alt="Map of Auce, Latvia" style="width: 100%; max-width: 650px; border-radius: 10px; box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);">
-        <div>
-            <p>Auce is located in the scenic Zemgale region, known for its natural beauty and agricultural richness:</p>
-            <ul>
-                <li>Rolling hills and fertile plains ideal for farming.</li>
-                <li>Proximity to the Lielupe River, offering picturesque views and recreational opportunities.</li>
-                <li>Nature reserves with well-maintained trails for hiking, cycling, and birdwatching.</li>
-            </ul>
-        </div>
-    </div>
-</section>
-
-<section id="accommodations">
-    <h2>Accommodations</h2>
-    <p>Auce offers a variety of lodging options to suit different preferences:</p>
-    <ul>
-        <li><b>Hotels:</b> Modern and comfortable accommodations with amenities like Wi-Fi and dining services.</li>
-        <li><b>Guesthouses:</b> Cozy and personalized stays that reflect local charm.</li>
-        <li><b>Rural Homesteads:</b> Stay close to nature in traditional Latvian farmhouses.</li>
-    </ul>
-</section>
-
-<section id="events-calendar">
-    <h2>Events Calendar</h2>
-    <p>Plan your visit around exciting events in Auce:</p>
-    <ul>
-        <li><b>Annual Festivals:</b> Highlights include the Summer Solstice Festival and Auce Day celebrations.</li>
-        <li><b>Local Events:</b> Regular markets, art exhibitions, and cultural performances that bring the community together.</li>
-    </ul>
-</section>
-
-<section id="local-businesses">
-    <h2>Local Businesses</h2>
-    <p>Support Auce's vibrant economy by exploring its local businesses:</p>
-    <ul>
-        <li><b>Shops:</b> Unique boutiques offering handmade crafts, souvenirs, and local products.</li>
-        <li><b>Dining:</b> Restaurants and cafes that serve authentic Latvian cuisine and international dishes.</li>
-    </ul>
-</section>
-
-<section id="gallery">
-    <h2>Gallery</h2>
-    <p>Experience Auce through visuals:</p>
-    <ul>
-        <li><b>Photos:</b> Stunning images of historic landmarks, natural scenery, and cultural events.</li>
-        <li><b>Videos:</b> Dynamic clips capturing the spirit of the town.</li>
-        <li><b>Virtual Tours:</b> Interactive experiences of popular attractions and hidden gems.</li>
-    </ul>
-</section>
-
-<section id="visitor-information">
-    <h2>Visitor Information</h2>
-    <p>Essential details to help you make the most of your visit:</p>
-    <ul>
-        <li><b>Tourist Office:</b> Located in the town center, offering maps, brochures, and guidance.</li>
-        <li><b>Guided Tours:</b> Available in multiple languages, showcasing key attractions and local stories.</li>
-    </ul>
-</section>
-
-<section id="contact-us">
-    <h2>Contact Us</h2>
-    <p>We are here to assist you:</p>
-    <ul>
-        <li><b>Inquiries:</b> Fill out our contact form for any questions or requests.</li>
-        <li><b>Social Media:</b> Follow us on Facebook, Instagram, and Twitter for updates and travel tips.</li>
-    </ul>
-</section>
-
-    <script>
-        const sections = document.querySelectorAll('section');
-        const observer = new IntersectionObserver(entries => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.transform = 'translateY(0) rotateX(0)';
-                    entry.target.style.opacity = '1';
-                }
-            });
-        }, {
-            threshold: 0.1
-        });
-
-        sections.forEach(section => {
-            observer.observe(section);
-        });
-    </script>
+  renderAnnouncements();
+</script>
 
 </body>
 </html>
