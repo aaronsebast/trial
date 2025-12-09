@@ -27,47 +27,16 @@
     .content { font-size: 1rem; line-height: 1.6; margin-bottom: 1.2rem; color: #ddd; }
     .btn { padding: 0.6rem 1.3rem; background: #bfa054; color: #111; border: none; font-weight: 600; border-radius: 4px; transition: background 0.3s ease, transform 0.2s ease; }
     .btn:hover { background: #d4b579; transform: translateY(-2px); }
-
-    /* Chatbot styles */
-    #chatbot {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      width: 300px;
-      max-height: 400px;
-      background: #1a1a1a;
-      border-radius: 10px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.7);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      font-family: 'Open Sans', sans-serif;
-    }
-    #chatbot-messages {
-      flex: 1;
-      padding: 10px;
-      overflow-y: auto;
-      font-size: 0.9rem;
-    }
-    #chatbot input {
-      border: none;
-      padding: 10px;
-      width: calc(100% - 20px);
-      outline: none;
-      background: #111;
-      color: #EEE;
-      font-size: 0.9rem;
-    }
-    .bot-msg { color: #bfa054; margin-bottom: 0.5rem; }
-    .user-msg { color: #fff; margin-bottom: 0.5rem; text-align: right; }
   </style>
 </head>
 <body>
 
+  <!-- Banner -->
   <div class="banner">
     <img src="riga_nordic_university_rnu_cover.jpg" alt="Riga Nordic University">
   </div>
 
+  <!-- Site title -->
   <div class="site-title">
     <h1>EduNotify</h1>
   </div>
@@ -77,16 +46,16 @@
     <div id="announcements"></div>
   </main>
 
-  <!-- Chatbot container -->
-  <div id="chatbot">
-    <div id="chatbot-messages">
-      <div class="bot-msg">Hi! Ask me about announcements or events.</div>
-    </div>
-    <input type="text" id="chatbot-input" placeholder="Type your question..."/>
-  </div>
+  <!-- ChatGPT Embed Widget -->
+  <script src="https://unpkg.com/@openai/chatgpt-widget"></script>
+  <chatgpt-widget
+    title="EduNotify AI Assistant"
+    input-placeholder="Ask me about announcements..."
+    welcome-message="Hello! I can answer your questions about announcements and events."
+  ></chatgpt-widget>
 
   <script>
-    // Announcements data
+    // Announcement data
     const announcements = [
       { id: 1, title: "Welcome Week – Orientation", content: "Welcome all new students! Orientation starts on 15 Sept.", category: "Event", read: false },
       { id: 2, title: "Maintenance Notice", content: "Server maintenance: 3 Oct, 02:00–05:00 UTC — site will be offline.", category: "Alert", read: false },
@@ -111,10 +80,7 @@
         const btn = document.createElement('button');
         btn.className = 'btn';
         btn.textContent = a.read ? 'Mark as unread' : 'Mark as read';
-        btn.onclick = () => {
-          a.read = !a.read;
-          renderAnnouncements();
-        };
+        btn.onclick = () => { a.read = !a.read; renderAnnouncements(); };
         div.appendChild(title);
         div.appendChild(cat);
         div.appendChild(content);
@@ -124,51 +90,6 @@
     }
 
     renderAnnouncements();
-
-    // Simple AI Q&A using local JS logic (mock AI)
-    const input = document.getElementById('chatbot-input');
-    const messages = document.getElementById('chatbot-messages');
-
-    input.addEventListener('keydown', function(e) {
-      if(e.key === 'Enter' && input.value.trim() !== '') {
-        const userText = input.value.trim();
-        appendMessage(userText, 'user-msg');
-        input.value = '';
-        respondAI(userText);
-      }
-    });
-
-    function appendMessage(text, cls) {
-      const div = document.createElement('div');
-      div.textContent = text;
-      div.className = cls;
-      messages.appendChild(div);
-      messages.scrollTop = messages.scrollHeight;
-    }
-
-    // Mock AI response based on announcements
-    function respondAI(question) {
-      question = question.toLowerCase();
-      let answer = "Sorry, I don't know about that.";
-      
-      // Simple keyword search
-      for(let a of announcements) {
-        if(a.title.toLowerCase().includes(question) || a.content.toLowerCase().includes(question)) {
-          answer = `${a.title}: ${a.content}`;
-          break;
-        }
-      }
-
-      // Simple matching for common queries
-      if(question.includes('events')) {
-        answer = announcements.filter(a=>a.category==='Event').map(a=>`${a.title}: ${a.content}`).join('\n');
-      }
-      if(question.includes('unread')) {
-        answer = announcements.filter(a=>!a.read).map(a=>`${a.title}`).join(', ') || "No unread announcements.";
-      }
-
-      appendMessage(answer, 'bot-msg');
-    }
   </script>
 
 </body>
