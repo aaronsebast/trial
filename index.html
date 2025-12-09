@@ -1,170 +1,90 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>EduNotify — Announcements</title>
+<!doctype html>
+model: 'gpt-4o-mini', // substitute with a model available to you
+messages: [
+{role:'system',content: system + '\nAnnouncements:\n' + annText},
+{role:'user',content: question}
+],
+max_tokens: 400,
+temperature: 0.2
+});
+const answer = response.data.choices[0].message.content.trim();
+res.json({answer});
+}catch(err){ console.error(err); res.status(500).json({error:err.message||String(err)}); }
+});
 
-  <!-- Elegant fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
 
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Open Sans', sans-serif; background: #111; color: #EEE; }
+// Summarize & classify
+app.post('/api/summarize', async (req,res)=>{
+try{
+const {title,content,category} = req.body;
+const prompt = `Summarize the following announcement into a 1-line headline and 3 concise bullet points. Also suggest a priority: High, Medium or Low. Return JSON with keys: summary, bullets (array), priority.`;
+const response = await client.createChatCompletion({ model:'gpt-4o-mini', messages:[{role:'system',content:prompt},{role:'user',content:`Title: ${title}\nCategory: ${category}\nContent: ${content}`}], max_tokens:300, temperature:0.0 });
+const answer = response.data.choices[0].message.content;
+// Try to extract JSON — if model returns plain text, wrap it
+let parsed = {summary: null, bullets: [], priority: 'Medium'};
+try{ parsed = JSON.parse(answer) }catch(e){
+// fallback: simple parsing
+parsed.summary = answer.split('\n')[0]; parsed.bullets = []; parsed.priority = 'Medium';
+}
+res.json(parsed);
+}catch(err){ console.error(err); res.status(500).json({error:err.message}); }
+});
 
-    /* Banner/header with full‑width image */
-    .banner {
-      width: 100%;
-      overflow: hidden;
-      position: relative;
-    }
-    .banner img {
-      width: 100%;
-      height: auto;
-      display: block;
-      object-fit: cover; /* ensures it fills width nicely and keeps aspect ratio */ 
-    }
 
-    /* Title area under banner */
-    .site-title {
-      text-align: center;
-      background: #0d0d0d;
-      padding: 1.5rem 1rem;
-    }
-    .site-title h1 {
-      font-family: 'Playfair Display', serif;
-      font-size: 3rem;
-      letter-spacing: 1px;
-      color: #f5f5f5;
-    }
+// Embedding-based indexing & search (very simple in-memory for demo)
+let embeddingIndex = []; // each: {id, title, content, category, embedding}
 
-    main {
-      padding: 2rem;
-      max-width: 900px;
-      margin: 0 auto;
-    }
 
-    /* Announcement cards CSS (same as before, or adjust as you like) */
-    .announcement {
-      background: #1a1a1a;
-      border: 1px solid #333;
-      padding: 1.8rem 2rem;
-      margin-bottom: 2rem;
-      border-radius: 8px;
-      transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
-    }
-    .announcement.unread {
-      border-color: #bfa054;
-    }
-    .announcement:hover {
-      transform: translateY(-8px) scale(1.02);
-      box-shadow: 0 8px 20px rgba(0,0,0,0.6);
-      background: #222;
-    }
+app.post('/api/emb_search', async (req,res)=>{
+try{
+const {op, announcement, query, announcements} = req.body;
+if(op === 'index' && announcement){
+// compute embedding
+const embedResp = await client.createEmbedding({ model:'text-embedding-3-large', input: announcement.title + '\n' + announcement.content });
+const emb = embedResp.data.data[0].embedding;
+embeddingIndex.push({id:announcement.id, title:announcement.title, content:announcement.content, category:announcement.category, embedding:emb});
+return res.json({ok:true});
+}
+if(op === 'search'){
+// Build embedding for query
+const q = query || '';
+const qEmbResp = await client.createEmbedding({ model:'text-embedding-3-large', input: q });
+const qEmb = qEmbResp.data.data[0].embedding;
+// simple cosine similarity
+function dot(a,b){ return a.reduce((s,v,i)=>s+v*b[i],0) }
+function norm(a){ return Math.sqrt(a.reduce((s,v)=>s+v*v,0)) }
+const qn = norm(qEmb);
+const scored = (announcements || embeddingIndex).map(a=>{
+const emb = a.embedding || (embeddingIndex.find(x=>x.id===a.id)?.embedding);
+if(!emb) return {...a,score:0};
+const score = dot(qEmb,emb) / (qn * norm(emb));
+return {...a, score};
+}).sort((a,b)=>b.score - a.score).slice(0,6);
 
-    .announcement h3 {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.8rem;
-      margin-bottom: 0.5rem;
-      color: #f9f9f9;
-      transition: color 0.3s ease;
-    }
-    .announcement:hover h3 {
-      color: #bfa054;
-    }
 
-    .category {
-      font-size: 0.9rem;
-      color: #999;
-      margin-bottom: 1rem;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      transition: color 0.3s ease;
-    }
-    .announcement:hover .category {
-      color: #ccc;
-    }
+// create short snippet for each
+const results = scored.map(s=>({id:s.id,title:s.title,category:s.category,content:s.content,score:s.score, snippet: s.content.slice(0,220)}));
+return res.json({results});
+}
+res.json({error:'invalid op'});
+}catch(err){ console.error(err); res.status(500).json({error:err.message}); }
+});
 
-    .content {
-      font-size: 1rem;
-      line-height: 1.6;
-      margin-bottom: 1.2rem;
-      color: #ddd;
-    }
-    .btn {
-      padding: 0.6rem 1.3rem;
-      background: #bfa054;
-      color: #111;
-      border: none;
-      font-weight: 600;
-      border-radius: 4px;
-      transition: background 0.3s ease, transform 0.2s ease;
-    }
-    .btn:hover {
-      background: #d4b579;
-      transform: translateY(-2px);
-    }
-  </style>
-</head>
-<body>
 
-  <!-- Full‑width banner with university image -->
-  <div class="banner">
-    <img src="riga_nordic_university_rnu_cover.jpg" alt="Riga Nordic University">
-  </div>
+// Translation endpoint
+app.post('/api/translate', async (req,res)=>{
+try{
+const {text, to} = req.body;
+const prompt = `Translate the following text into ${to}. Keep it natural and concise.`;
+const response = await client.createChatCompletion({ model:'gpt-4o-mini', messages:[{role:'system',content:prompt},{role:'user',content:text}], max_tokens:400 });
+res.json({translation: response.data.choices[0].message.content.trim()});
+}catch(err){ console.error(err); res.status(500).json({error:err.message}); }
+});
 
-  <!-- Site title below banner -->
-  <div class="site-title">
-    <h1>EduNotify</h1>
-  </div>
 
-  <main>
-    <h2 style="margin-bottom: 1.5rem; color: #f5f5f5; font-family: 'Playfair Display', serif;">Announcements</h2>
-    <div id="announcements"></div>
-  </main>
+const PORT = process.env.PORT || 3000; app.listen(PORT, ()=>console.log('Server running on', PORT));
+</script>
 
-  <script>
-    const announcements = [
-      { id: 1, title: "Welcome Week – Orientation", content: "Welcome all new students! Orientation starts on 15 Sept.", category: "Event", read: false },
-      { id: 2, title: "Maintenance Notice", content: "Server maintenance: 3 Oct, 02:00–05:00 UTC — site will be offline.", category: "Alert", read: false },
-      { id: 3, title: "New Library Hours", content: "Library now open until 22:00 on weekdays.", category: "General", read: false }
-    ];
-
-    function renderAnnouncements() {
-      const container = document.getElementById('announcements');
-      container.innerHTML = '';
-      announcements.forEach(a => {
-        const div = document.createElement('div');
-        div.className = 'announcement' + (a.read ? '' : ' unread');
-        const title = document.createElement('h3');
-        title.textContent = a.title;
-        const cat = document.createElement('div');
-        cat.className = 'category';
-        cat.textContent = a.category;
-        const content = document.createElement('div');
-        content.className = 'content';
-        content.textContent = a.content;
-        const btn = document.createElement('button');
-        btn.className = 'btn';
-        btn.textContent = a.read ? 'Mark as unread' : 'Mark as read';
-        btn.onclick = () => {
-          a.read = !a.read;
-          renderAnnouncements();
-        };
-
-        div.appendChild(title);
-        div.appendChild(cat);
-        div.appendChild(content);
-        div.appendChild(btn);
-
-        container.appendChild(div);
-      });
-    }
-
-    renderAnnouncements();
-  </script>
 
 </body>
 </html>
